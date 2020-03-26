@@ -1,0 +1,104 @@
+﻿@using Gym.Core.DbEntities
+@model IEnumerable<Gym.Core.DbEntities.Subscription>
+@{
+    ViewBag.Title = "انظمة الاشتراكات";
+}
+<!-- Page Heading -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            انظمة الاشتراكات
+        </h1>
+        <ol class="breadcrumb">
+            <li class="active">
+                <i class="fa fa-table"></i> الاشتراكات
+            </li>
+        </ol>
+    </div>
+</div>
+<!-- /.row -->
+
+<div class="row">
+
+    <button type="button" class="btn btn-primary btn-lg btn-link" data-toggle="modal" data-target="#addNewSubscription">
+        <i class="fa fa-plus-circle "></i> اضافة نظام اشتراك جديد
+    </button>
+
+</div>
+<br />
+
+<div class="row">
+
+    @foreach (var i in Model)
+    {
+        <div class="col-md-3">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">@i.Name</h3>
+                </div>
+                <div class="panel-body">
+                    @i.Description
+                </div>
+                <div class="panel-footer">سعر الاشتراك :@i.Price جنيه</div>
+                <div class="panel-footer">عدد الحصص :@i.CourseAmount حصص</div>
+            </div>
+        </div>
+    }
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="addNewSubscription" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">اضافة نظام اشتراك جديد الى الجيم</h4>
+            </div>
+            @using (Html.BeginForm("AddSubscription", "Subscriptions", FormMethod.Post))
+            {
+                <div class="modal-body">
+
+
+                    <div class="form-group">
+                        <label class="control-label">اسم النظام</label>
+
+                        @Html.TextBoxFor(x => new Subscription().Name, new { @class = "form-control" })
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label">السعر بالجنيه</label>
+                        @Html.TextBoxFor(x => new Subscription().Price, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">عدد جلسات الاشتراك</label>
+                        @Html.TextBoxFor(x => new Subscription().CourseAmount, new { @class = "form-control" })
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">شرح الاشتراك</label>
+                        @Html.TextAreaFor(x => new Subscription().Description, new { @class = "form-control" })
+                    </div>
+
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">اغلاق</button>
+                    <button type="submit" class="btn btn-primary">اضافة الاشتراك</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

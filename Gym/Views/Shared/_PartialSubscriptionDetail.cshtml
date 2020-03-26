@@ -1,0 +1,24 @@
+﻿@model IEnumerable<Gym.Core.DbEntities.TraineeSubscriptionsDetail>
+<table class="table table-striped">
+<thead>
+<tr>
+    <th>التاريخ</th>
+    
+</tr>
+</thead>
+<tbody>
+    @if (Model.Count() == 0)
+    {
+        <tr class="text-center">
+            <td>لا يوجد جلسات فى هذا الاشتراك</td>
+        </tr>
+    }
+    @foreach (var i in Model)
+    {
+        <tr>
+            <td>@i.SubscriptionDetailStartTime.ToShortDateString()</td>
+        </tr>
+    }
+
+</tbody>
+</table>

@@ -1,0 +1,191 @@
+﻿@model Gym.Core.ViewModels.ProfileViewModel
+
+@{
+    ViewBag.Title = "الملف الشخصى";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            @Model.Trainee.Name
+        </h1>
+        <ol class="breadcrumb">
+            <li class="active">
+                <i class="fa fa-users"></i> البروفايل الشخصى
+            </li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="row">
+            <div class=" col-md-4 ">
+                <label style="font-weight:bold;">اسم العضو</label>
+            </div>
+            <div class="col-md-8">
+                @Model.Trainee.Name
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-4 ">
+                <label style="font-weight:bold;">طول العضو</label>
+            </div>
+            <div class="col-md-8 ">
+                @Model.Trainee.Height
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class=" col-md-4 ">
+                <label style="font-weight:bold;">وزن العضو</label>
+            </div>
+            <div class="col-md-8 ">
+                @Model.Trainee.Weight
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-4 ">
+                <label style="font-weight:bold;">معدل الزيادة/النقص للعضو</label>
+            </div>
+            <div class="col-md-8">
+                @Model.Trainee.AvgForm
+            </div>
+        </div>
+        <hr />
+    </div>
+    <div class="col-md-6">
+        @using (Html.BeginForm("AddSubscriptionToTrainee","Trainee",FormMethod.Post))
+        {
+            <fieldset>
+        <legend>اضافة اشتراك للعضو :</legend>
+            <div class="form-group">
+                <label >نوع الاشتراك :</label>
+                @Html.DropDownListFor(x=>Model.SubscriptionList
+                    ,new SelectList(Model.SubscriptionList,"Id","Name"),new{@class="form-control"})
+        
+            </div>
+            @Html.Hidden("traineeId",Model.Trainee.Id)
+        <input type="submit" value="اضافة اشتراك" class="btn btn-danger"/>
+        </fieldset>
+        }
+    </div>
+</div>
+<div class="row">
+    <ol class="breadcrumb">
+        <li class="active">
+            <i class="fa fa-users"></i> الاشتراكات الخاصة بالعضو
+        </li>
+    </ol>
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>اسم الاشتراك</th>
+                <th>بداية الاشتراك</th>
+                <th>جلسات الحضور</th>
+                <th>حالة الاشتراك</th>
+                <th>العمليات</th>
+            </tr>
+            </thead>
+            <tbody>
+        
+            @foreach (var i in Model.Subscriptions)
+            {
+              
+                <tr>
+                    <td>
+                        @Ajax.ActionLink(@i.Name, "GetSubscriptionDetail", new {SubId = i.Id}, new AjaxOptions
+                        {
+                            HttpMethod = "Post",
+                            InsertionMode = InsertionMode.Replace,
+                            UpdateTargetId = "SubscriptionDetailArea"
+                        })
+                      
+                    </td>
+                    <td>@i.StartDate.ToShortDateString()</td>
+                    <td>@i.AttendedAmount</td>
+                    @{
+                      bool Temp = (@i.EndDate < DateTime.Now || @i.SubscriptionAmount == @i.AttendedAmount);
+                    }
+                    @if (Temp)
+                    {
+                        <td list-group-item list-group-item-danger>منتهى</td>
+                    }
+                    else
+                    {
+                        <td class="list-group-item list-group-item-success">صالح</td>
+                    }
+                   
+                    <td>
+                        @using (Html.BeginForm("AttachSubscriptionDetail","Trainee",new {subId = i.Id,traineeId = Model.Trainee.Id},FormMethod.Post,new{style="display:inline-block"}))
+                        {
+
+                            <input type="submit" disabled="@Temp"  value="تسجيل جلسة" class="btn btn-primary" />
+                        }
+                        @using (Html.BeginForm("DeleteTraineeSubscription","Trainee",new {subId = i.Id,traineeId = Model.Trainee.Id},FormMethod.Post,new{style="display:inline-block"}))
+                        {
+                            <input type="submit" value="حذف الاشتراك" class="btn btn-danger" />
+                        }
+                    </td>
+
+                </tr>
+            }
+
+           
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+       <div id="SubscriptionDetailArea"></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <h5 class="h5 text-center">جدول التغير فى مستوى الوزن لكل شهر</h5>
+        <div id="weightChart">
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var str = window.location.href;
+            str = str.split("/");
+
+            $.get('@Url.Action("WeightGraphData", "Trainee")',
+                {id : str[str.length - 1]},
+                function (result) {
+
+                    config = {
+                        data: JSON.parse(JSON.stringify(result)),
+                        xkey: 'Month',
+                        ykeys: ['Weight'],
+                        labels: ['الوزن', 'Total Outcome'],
+                        fillOpacity: 0.6,
+                        parseTime: false,
+                        hideHover: 'auto',
+                        behaveLikeLine: true,
+                        resize: true,
+                        pointFillColors:['#ffffff'],
+                        pointStrokeColors: ['black'],
+                        lineColors:['red','red']
+                    };
+                    config.element = 'weightChart';
+                    Morris.Line(config);
+
+
+                });
+        });
+    </script>
+}
